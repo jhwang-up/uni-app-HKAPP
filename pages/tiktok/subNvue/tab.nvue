@@ -1,0 +1,70 @@
+<template>
+	<!-- <view class="tab">
+		<navigator open-type="switchTab" url="/pages/index/index" class="tab-box">
+			<text class="text">首页</text>
+		</navigator>
+		<navigator open-type="switchTab" url="/pages/follow/follow" class="tab-box">
+			<text class="text">关注</text>
+		</navigator>
+		<view class="tab-box" @click="toWhere('addVideo')">
+			<view class="">
+				<image class="add-img" src="../../../static/img/tiktok/add.png" mode=""></image>
+			</view>
+		</view>
+		<navigator open-type="switchTab" url="/pages/news/news" class="tab-box">
+			<text class="text">消息</text>
+		</navigator>
+		<view class="tab-box" @click="toWhere('mine')">
+			<text class="text">我</text>
+		</view>
+	</view> -->
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		},
+		methods: {
+			toWhere(where) {
+				uni.navigateTo({
+					url: `/pages/tiktok/${where}`
+				});
+			}
+		}
+	}
+</script>
+
+<style>
+	.tab {
+		height: 50px;
+		width: 750rpx;
+		background-color: rgba(0, 0, 0, 0.6);
+		align-items: center;
+		justify-content: center;
+		flex-direction: row;
+	}
+
+	.text {
+		color: #ffffff;
+	}
+
+	.tab-box {
+		align-items: center;
+		justify-content: center;
+		width: 150rpx;
+		color: #ffffff;
+		text-align: center;
+		height: 50px;
+		line-height: 50px;
+		font-size: 20px
+	}
+
+	.add-img {
+		width: 50rpx;
+		height: 50rpx;
+	}
+	
+</style>

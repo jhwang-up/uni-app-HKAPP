@@ -1,0 +1,221 @@
+<template>
+	<div class="video-box" :style="{ height: '800px' }">
+		<!-- 视频渲染数预加载数影响性能 -->
+		<block>
+			<chunlei-video class="video" :src="currentVideo.src" :height="800" :width="width" :play="currentVideo.flag"
+				:gDuration="currentVideo.duration" :objectFit="currentVideo.objectFit"
+				:initialTime="currentVideo.initialTime" @pause="pauseVideo" :rotateImg="`//static/img/disc.jpg`"
+				:danmuList="danmuList">
+			</chunlei-video>
+			<cover-view class="cover-view-left">
+				<text class="left-text">@{{currentVideo.at}}</text>
+				<text class="left-text">{{currentVideo.content}}</text>
+				<div class="tag-box">
+					<text v-for="a in currentVideo.tag" class="tag">{{a}}</text>
+				</div>
+			</cover-view>
+			<cover-view class="cover-view-right">
+				<cover-image :src="currentVideo.avatar" class="avatar img" @click.stop="tapAvatar()"></cover-image>
+				<text v-if="!currentVideo.attention" class="right-text-avatar">+</text>
+				<text class="right-text"></text>
+				<cover-image @click.stop="tapLove()"
+					:src="currentVideo.check?'../../static/aixinRed.png':'../../static/aixin.png'" class="img">
+				</cover-image>
+				<text class="right-text">{{currentVideo.like}}</text>
+			</cover-view>
+
+		</block>
+	</div>
+</template>
+
+<script>
+	// 调整一下高度，看下插件的高度是咋样的，是否可以不引入scrollMixins文件啊？？？？？？
+	// 花个10min 搞定高度，然后搞上传头像功能
+	import {
+		addOrDeleteLikeVideo, // 淮矿抖音添加移除收藏接口
+	} from '@/common/api.js'; //引入需要的api 
+	import chunleiVideo from '@/components/chunlei-video/chunlei-video';
+	// import scrollMixins from './scrollMixins';
+	const BindingX = uni.requireNativePlugin('bindingx');
+	const animation = weex.requireModule('animation');
+	const modal = weex.requireModule('modal');
+	export default {
+		data() {
+			return {
+				currentVideo: {
+					flag: true, // 暂未搞清楚该变量的作用????
+				},
+			}
+		},
+		onLoad(options) {
+			// 需要传递参数 地址 点赞数 头像 标签 简介
+			console.log("视频详情页参数=="+JSON.stringify(options))
+			this.currentVideo.src = JSON.parse(decodeURIComponent(options.src));;
+			this.currentVideo.avatar = JSON.parse(decodeURIComponent(options.avatar));;
+			this.currentVideo.like = options.like;
+			this.currentVideo.at = options.at;
+			this.currentVideo.content = options.content;
+			this.currentVideo.check = JSON.parse(options.check);
+			this.currentVideo.attention = JSON.parse(options.attention);
+			this.currentVideo.tag = options.tag.split(',');
+			this.currentVideo.userId = options.userId;
+			this.currentVideo.zj = options.zj;
+		},
+		methods: {
+			tapAvatar(e) {
+				// 点击头像，读取当前登陆用户，vuex获取；
+				// 读取当前视频的发布者，这两个比对，如果一致，就跳转到我的页面
+				// 如果不一致 则跳转到others
+				// 
+				// e.stopPropagation();
+				if (this.currentVideo.userId === this.$store.state.userInfo.userId) {
+					uni.navigateTo({
+						url: `/pages/tiktok/mine`
+					});
+				} else {
+					uni.navigateTo({
+						url: `/pages/tiktok/others?attention=${this.currentVideo.attention}&userId=${this.currentVideo.userId}&avatar=${encodeURIComponent(JSON.stringify(this.currentVideo.avatar))}`
+					});
+				}
+			},
+			tapLove(e) {
+				uni.vibrateShort({
+					success: function() {
+						console.log('success');
+					}
+				});
+				this.currentVideo.check = !this.currentVideo.check;
+				console.log(JSON.stringify(this.currentVideo));
+				this.$forceUpdate()
+				let tempType = '';
+				if (!this.currentVideo.check) {
+					tempType = 'delete';
+					this.currentVideo.like--;
+				} else {
+					this.currentVideo.like++;
+				}
+				addOrDeleteLikeVideo({
+					zj: this.currentVideo.zj,
+					type: tempType
+				}).then(res => {
+					console.log(JSON.stringify(res));
+				}).catch(err => {
+					uni.showToast({
+						title: `异常，请稍后重试`,
+						icon: 'none'
+					});
+				})
+			},
+		}
+
+	}
+</script>
+
+<style lang="scss">
+	.video-box {
+		height: 700px;
+		position: relative;
+		background-color: #000;
+	}
+
+	.cover-view-center {
+
+		position: fixed;
+		justify-content: center;
+		align-items: center;
+
+		z-index: 999;
+	}
+
+	.cover-view-top {
+		position: fixed;
+		width: 750rpx;
+		height: 150px;
+		overflow: hidden;
+	}
+
+	.cover-view-left {
+		position: absolute;
+		margin-left: 10upx;
+		width: 500upx;
+		bottom: 200upx;
+		z-index: 9999;
+		font-size: 16px;
+		color: #FFFFFF;
+	}
+
+	.left-text {
+		font-size: 16px;
+		color: #FFFFFF;
+		margin-bottom: 20upx;
+	}
+
+	.tag-box {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+	}
+
+	.tag {
+		font-size: 12px;
+		color: #EFEFEF;
+		background-color: rgba(255, 255, 255, 0.2);
+		margin-right: 8px;
+		padding: 2px 8px;
+	}
+
+	.avatar {
+		border-radius: 50upx;
+		border-color: #fff;
+		border-style: solid;
+		border-width: 2px;
+	}
+
+	.cover-view-right {
+		position: absolute;
+		top: 400upx;
+		right: 20upx;
+		z-index: 9999;
+	}
+
+	.right-text-avatar {
+		position: absolute;
+		font-size: 14px;
+		top: 80upx;
+		left: 30upx;
+		height: 40upx;
+		width: 40upx;
+		background-color: #DD524D;
+		color: #FFFFFF;
+		border-radius: 50%;
+		text-align: center;
+		line-height: 40upx;
+		z-index: 999;
+	}
+
+	.avatar-icon {
+		height: 40upx;
+		width: 40upx;
+
+		color: #fff;
+		background-color: #DD524D;
+		border-radius: 50%;
+		position: absolute;
+		left: 30upx;
+		top: -20upx;
+	}
+
+	.right-text {
+		text-align: center;
+		font-size: 14px;
+		color: #FFFFFF;
+		margin-bottom: 50upx;
+		height: 20px;
+	}
+
+	.img {
+		height: 100upx;
+		width: 100upx;
+		opacity: 0.9;
+	}
+</style>

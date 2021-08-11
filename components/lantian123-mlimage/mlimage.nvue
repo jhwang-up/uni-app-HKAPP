@@ -1,0 +1,218 @@
+<template>
+	<div style="position:relative;" :style="{'width':swidth,'height':sheight}">
+		<image lazy-load="true" class="z-pic" :src="tsrc" :mode="imgMode" :style="{'width':swidth,'height':sheight,'background-color':backColor}" @load="loadImage"></image>
+	</div>
+</template>
+<style>
+	.z-pic {
+		position:absolute;
+		top:0;
+		left:0;
+	}
+</style>
+<script>
+	//加载占位图的图片路径
+	var loadPath = "/static/jiazai/loading.png"
+	//加载占位图的背景颜色
+	var loadBackColor = "#000000"
+	//图片加载失败的图片路径
+	var failPath = "/static/jiazai/shibai.jpg"
+	//图片加载失败的背景颜色
+	var failBackColor = "#000000"
+	//缓存形式 1:临时缓存 2:永久缓存 临时缓存为单次打开应用缓存，文件会自动清理
+	var mode = 2
+	// #ifdef MP-WEIXIN || H5
+	//小程序受本地文件空间大小限制最好不要采用永久缓存,H5临时文件由浏览器控制不会自动删除
+	mode = 1
+	// #endif
+	export default {
+		data() {
+			return {
+				imgMode:"aspectFit",
+				init:false,
+				tsrc:loadPath,
+				ssrc:'',
+				showflag:true,
+				initTime:0,
+				backColor:loadBackColor
+			}; 
+		},
+		props:{
+			swidth: {
+				type: String
+			},
+			sheight: {
+				type: String
+			},
+			src:{
+				type: String,
+				default: ""
+			},
+			
+		},
+		onLoad(options) {
+		},
+		created(){
+			var that = this;
+			that.ssrc = that.src;
+		},
+		destroyed() {
+			let that = this
+			if(that.initTime>0){
+				clearInterval(that.initTime)
+				that.initTime = 0
+			}
+		},
+		methods:{
+			//load图片方法
+			loadImage(){
+				var that = this
+				if(!that.init&&(that.tsrc==loadPath||that.tsrc == failPath)){
+					that.init = true
+					function loadImpl(){
+						if(that.ssrc != ""){
+							//有需要加载的图片
+							if(that.initTime>0){
+								clearInterval(that.initTime)
+								that.initTime = 0
+							}
+							uni.getStorage({
+								key:that.ssrc,
+								success:function(val){
+									let data = val.data
+									if(!data){
+										//不存在缓存数据
+										downImg()
+										return
+									}
+									if(!data.type){
+										//不符合的数据
+										downImg()
+										return
+									}
+									if(data.type == "long"){
+										//是持久保存的数据
+										that.setImage(data.path)
+										return
+									}else if(data.type == "temp"){
+										//是临时保存的数据
+										uni.getFileInfo({
+											filePath:data.path,
+											success(ress) {
+												//有数据
+												that.setImage(data.path)
+											},fail(ress) {
+												//无数据
+												downImg()
+											}
+										})
+									}
+								},
+								fail(val) {
+									 downImg()
+								}
+							})
+							function downImg(){
+								//开始下载资源
+								uni.downloadFile({
+								    url: that.ssrc,
+								    success: (res) => {
+								        if (res.statusCode === 200) {
+											if(mode == 1){
+												//临时缓存
+												var savedFilePath = res.tempFilePath
+												let saveData = {}
+												saveData.type = "temp"
+												saveData.path = savedFilePath
+												uni.setStorage({
+													key:that.ssrc, 
+													data:saveData,
+													success() {
+														that.setImage(savedFilePath)
+													},
+													fail() {
+														console.log("保存图片缓存路径失败")
+													}
+												}) 
+											}else if(mode == 2){
+												//永久缓存
+												uni.saveFile({
+												      tempFilePath: res.tempFilePath,
+												      success: function (ress) {
+												        var savedFilePath = ress.savedFilePath
+														let saveData = {}
+														saveData.type = "long"
+														saveData.path = savedFilePath
+														uni.setStorage({
+															key:that.ssrc, 
+															data:saveData,
+															success() {
+																that.setImage(savedFilePath)
+															},
+															fail() {
+																console.log("保存图片缓存路径失败")
+															}
+														}) 
+												      },
+													  fail() {
+												      	//显示加载失败图片
+														console.log("保存到本地图片缓存失败")
+														that.setFailImg()
+												      }
+												});
+											}
+								        }else{
+											//显示加载失败图片
+											that.setFailImg()
+										}
+								    },
+									fail: (res) => {
+										//显示加载失败图片
+										that.setFailImg()
+								    },
+								});
+							}
+						}
+					}
+					if(that.ssrc == ""){
+						that.initTime = setInterval(function(){
+							loadImpl()
+						},1000)
+					}else{
+						loadImpl()
+					}
+				}
+			},
+			//设置图片方法
+			setImage(src){
+				this.tsrc = src
+				this.imgMode = "scaleToFill"
+				this.init = false
+			},
+			//设置图片加载失败方法
+			setFailImg(){
+				let that = this
+				that.imgMode = "aspectFit"
+				that.backColor=failBackColor
+				that.tsrc=failPath
+				this.init = false
+			},
+			//重置初始化方法
+			initImg(){
+				let that = this
+				that.backColor=loadBackColor
+				that.imgMode = "aspectFit"
+				that.tsrc=loadPath
+				this.init = false
+			}
+		},
+		watch:{
+			src(val){
+				this.ssrc = val
+			},
+			ssrc(val){
+				this.initImg()
+			}
+		}
+	}
+</script>

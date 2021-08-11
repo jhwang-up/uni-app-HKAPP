@@ -1,0 +1,190 @@
+<template>
+	<view class="container">
+		<view class="list-item" v-for="(item, index) in myData" :key="index" @click="_click(index)">
+			<view class="scroll-item">
+				<image class="user-img" :src="item.url" mode=""></image>
+				<view class="user-info">
+					<text class="text">{{item.userName}}</text>
+				</view>
+			</view>
+		</view>
+		<view class="statusText-view">
+			<text class="statusText" :style="{
+				 'color': statusTextColor
+			 }" @tap="getData()">
+				{{statusText.text || '暂无更多数据了'}}
+			</text>
+		</view>
+	</view>
+</template>
+
+<script>
+	import utils from '@/common/utils.js';
+	import {
+		doPageDemand
+	} from '../../js/pageDemand.js';
+	import {
+		getTabList
+	} from '@/common/getTabList.js';
+	// #ifdef APP-NVUE
+	const modal = weex.requireModule('modal');
+	// #endif
+	export default {
+		props: {
+			current: {
+				type: Number,
+				default: -1
+			},
+			tab: {
+				type: Object,
+				default () {
+					return {};
+				}
+			},
+			statusTextColor: {
+				type: String,
+				default: '#666'
+			},
+			userId: {
+				type: String,
+				default: ''
+			},
+		},
+		data() {
+			return {
+				list: [],
+				myData: [], // 用于监听list变化后，对list处理
+				sendData: {
+					pageNum: 1,
+					pageSize: 10,
+					tabId: this.tab,
+					userId:this.userId
+				},
+				statusText: {},
+				refreshClear: false
+			}
+		},
+		watch: {
+			list() {
+				for (let s of this.list) {
+					let temp = {};
+					temp.userName = s.USERNAME;
+					temp.url = utils.dealInternetUrl(s.TXDZ, '', this.$store.state.userInfo.userId);
+					this.myData.push(temp);
+				}
+			},
+		},
+		methods: {
+			getData(status) {
+				let refresh = false;
+				let doEvent = false;
+				switch (status) {
+					case 'init':
+						refresh = true;
+						break;
+					case 'refresh':
+						refresh = true;
+						break;
+					default:
+						doEvent = true;
+						break;
+				}
+				let _this = this;
+				doPageDemand.call(_this, {
+					getDataFn: getTabList, //获取数据的方法
+					successEnd() {
+						if (refresh) _this.$emit('refreshEnd', _this.current, true);
+					},
+					fail() {
+						if (refresh) _this.$emit('refreshEnd', _this.current, false);
+					}, //接口访问失败回调
+
+					sendDataName: 'sendData', //携带数据字段名称
+					pageNumName: 'pageNum', //携带数据中的页数字段名称
+					pageSizeName: 'pageSize', //携带数据中的条数字段名称
+
+					checkLastPageMode: false, //判断是否是最后一页的逻辑标识, 用于逻辑判断, 目前默认有两个参数 size: 判断条数, page: 判断页数, 默认为size
+					newDatafields: 'list', //接口访问成功后获取列表数据字段名称, 可用. 链式获取
+					dataLastPageName: false, //接口访问成功后数据中的最大页数字段名称, 可用. 链式获取
+					sizeName: false, //接口访问成功后数据中条数字段名称, 可用. 链式获取
+
+					setName: 'list', //页面中列表数据字段名称, 如果在页面中分别有两个或两个以上列表使用该js, 则页面中需区分传入, 否则可以忽略
+					statusTextName: 'statusText', //页面中列表状态字段名称, 如果在页面中分别有两个或两个以上列表使用该js, 则页面中需区分传入, 否则可以忽略
+					lastPageName: false, //页面中最后一页字段名称, 如果在页面中分别有两个或两个以上列表使用该js, 则页面中需区分传入, 否则可以忽略
+					waitingName: false, //页面中获取数据等待字段名称, 如果在页面中分别有两个或两个以上列表使用该js, 则页面中需区分传入, 否则可以忽略
+
+					refresh, //刷新标识, 若为true则会将携带数据中的页数重置为1
+					force: false, //强制标识, 若为true则会忽略等待标识为true时的跳过操作
+					doEvent, //进入状态判断标识, 若为true则会进入判断列表status而进行相应操作
+
+					noDataText: false, //访问接口后若数据长度为0则可自定义为空时文字
+
+					refreshClear: _this.refreshClear, //刷新时是否清空数据
+				})
+			},
+			_click(index) {
+				// #ifdef APP-NVUE
+				// modal.toast({
+				// 	message: `点击了第${this.current}列 第${index}项`,
+				// 	duration: 0.3
+				// })
+				// #endif
+				// #ifndef APP-NVUE
+				// uni.showToast({
+				// 	title: `点击了第${this.current}列 第${index}项`,
+				// 	icon: 'none'
+				// })
+				// #endif
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	.container {
+		flex-direction: column;
+		padding: 35rpx;
+	}
+
+	.list-item {
+		height: 180rpx;
+		border-radius: 8rpx;
+		background-color: #fff;
+		flex-direction: row;
+		margin-bottom: 17px;
+		background-color: #333333;
+		align-items: center;
+	}
+
+	.scroll-item {
+		background-color: #333333;
+		flex-direction: row;
+	}
+
+	.user-img {
+		width: 58px;
+		height: 58px;
+		border-radius: 30px;
+		margin-right: 16px;
+	}
+
+	.user-info {
+		justify-content: center;
+	}
+
+	.text {
+		color: #ffffff;
+	}
+
+	.statusText-view {
+		width: 680rpx;
+		height: 40px;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.statusText {
+		font-size: 30rpx;
+	}
+</style>

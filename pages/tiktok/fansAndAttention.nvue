@@ -1,0 +1,60 @@
+<template>
+	<view class="fansAndAttention">
+		<view class="content">
+			<!-- QSTabsListNvue组件中如果需要修改传递参数只需要在defComponent.nvue中的sendData添加值即可！！！ -->
+			<QSTabsListNvue ref="QSTabsListNvue" :userId="userId" :hasRefresh="false" :lineWidth="160"
+				:height="windowHeight" :minWidth="minWidth" defCurrent="0" defColor="#f2f2f2" activeColor="#fff"
+				tabsBackgroundColor="#000" swiperBackgroundColor="#000" refreshTextColor="#fff" statusTextColor="#fff">
+			</QSTabsListNvue>
+		</view>
+	</view>
+</template>
+
+<script>
+	/*
+		1. 问题一：数据错误提示 请消除
+		2. 获取粉丝和关注的逻辑，就是通过控制vuex的全局变量，然后在调用接口时，直接传递该变量即可；
+		3. 点击用户头像事件获取数据，带着数据传递到该用户的首页 （等其他用户首页完成 2h）
+	*/
+	import utils from '@/common/utils.js'
+	import {} from '@/common/api.js'; //引入需要的api 
+	import QSTabsListNvue from '@/components/QS-tabs-list-nvue/QS-tabs-list-nvue.nvue';
+	export default {
+		components: {
+			QSTabsListNvue
+		},
+		data() {
+			return {
+				windowHeight: 0,
+				title: 'Hello',
+				minWidth: '375rpx',
+			}
+		},
+		onLoad(options) {
+			this.userId = options.userId;
+		},
+		mounted() {
+			const {
+				windowHeight,
+				screenHeight
+			} = uni.getSystemInfoSync();
+			this.windowHeight = windowHeight; // 88是下面css中元素content距离顶部的距离
+			// 此处计算关注和粉丝数，填入这里面，可以从我的页面传递过来，然后下面的值可以再说
+			let tabs = ['关注', '粉丝']
+			this.$refs.QSTabsListNvue.setTabs(tabs);
+			uni.setNavigationBarTitle({
+				title: this.$store.state.userInfo.userName
+			});
+		}
+	}
+</script>
+
+<style lang="scss">
+	.fansAndAttention {
+		background: #171724;
+	}
+
+	.content {
+		// margin-top: 88px;
+	}
+</style>

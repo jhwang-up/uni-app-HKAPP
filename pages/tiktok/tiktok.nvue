@@ -1,0 +1,598 @@
+<template>
+	<div>
+		<div class="page">
+			<div class="cover-view-center" v-if="distanceX==0">
+				<div :style="{ height: `${sysheight-60}px`,width: width }" ref="touch" @click="clickVideo(index)"
+					@touchstart="ListTouchStart" @touchmove="ListTouchMove">
+					<div class="cover-view-right" v-if="distanceX==0">
+						<image class="img" @click.stop="tapAvatar"></image>
+						<text class="right-text"> </text>
+						<image class="img" @click.stop="tapLove"></image>
+						<text class="right-text"> </text>
+						<image class="img" @click.stop="tapMsg"></image>
+						<text class="right-text"> </text>
+						<image class="img" @click.stop="tapShare"></image>
+						<text class="right-text"> </text>
+					</div>
+				</div>
+			</div>
+			<div class="swiper" v-if="isShowVideos" ref="swiper">
+				<block v-for="(item, idx) in videoList" :key="idx">
+					<div class="video-box" :style="{ height: height }">
+						<!-- 视频渲染数预加载数影响性能 -->
+						<block v-if="Math.abs(index-idx)<=1">
+							<chunlei-video class="video" :src="item.src" :height="height" :width="width"
+								:play="item.flag" :gDuration="item.duration" :objectFit="item.objectFit"
+								:initialTime="item.initialTime" @pause="pauseVideo" @playEvent="playEvent"
+								:rotateImg="`//static/img/disc.jpg`" :danmuList="danmuList">
+							</chunlei-video>
+							<cover-view class="cover-view-left">
+								<text class="left-text">@{{item.at}}</text>
+								<text class="left-text">{{item.content}}</text>
+								<div class="tag-box">
+									<text v-for="a in item.tag" class="tag">{{a}}</text>
+								</div>
+							</cover-view>
+							<cover-view class="cover-view-right">
+								<!-- 这个加号根据是否关注字段来控制显示隐藏 -->
+								<cover-image :src="item.avatar" class="avatar img" @click.stop="tapAvatar()">
+								</cover-image>
+								<text v-if="!item.attention" class="right-text-avatar">+</text>
+								<text class="right-text"></text>
+								<cover-image :src="item.check?'../../static/aixinRed.png':'../../static/aixin.png'"
+									class="img" @click.stop="tapLove()"></cover-image>
+								<text class="right-text">{{item.like}}</text>
+								<!-- <cover-image src="../../static/xiaoxi.png" class="img" @click.stop="tapMsg"></cover-image>
+							<text class="right-text">{{item.comment}}</text> -->
+								<!-- <cover-image src="../../static/share-fill.png" class="img" @click.stop="tapShare"></cover-image>
+							<text class="right-text">分享</text> -->
+							</cover-view>
+
+						</block>
+					</div>
+
+				</block>
+			</div>
+
+			<div class="left-div" :style="{ height: height,width: width,left:`${-parseInt(width)}px` }" ref="left"
+				@touchstart="ListTouchStart" @touchmove="ListTouchMove">
+				<text class="title-text" @click="clickbt">{{videoList[index].at}}</text>
+			</div>
+			<div class="right-div" :style="{ height: height,width: width,right:`${-parseInt(width)}px` }" ref="right"
+				@touchstart="ListTouchStart" @touchmove="ListTouchMove">
+				<text class="title-text">{{videoList[index].content}}</text>
+			</div>
+
+		</div>
+		<!-- 顶部搜索栏 -->
+		<div class="cover-view-top">
+			<div class="search-box" @click="toSearch">
+				<image class="search-img" src="../../static/img/tiktok/search.png" mode=""></image>
+			</div>
+		</div>
+
+		<!-- 底部tab -->
+		<div class="cover-view-bottom">
+			<div style="display: flex;justify-content: flex-end;" :style="{ height: `${sysheight}px`,width: width }">
+				<div style="width: 750rpx;" class="tab-box">
+
+					<view class="tab">
+						<navigator open-type="switchTab" url="/pages/index/index" class="tab-box">
+							<text class="text">首页</text>
+						</navigator>
+						<navigator open-type="switchTab" url="/pages/follow/follow" class="tab-box">
+							<text class="text">关注</text>
+						</navigator>
+						<view class="tab-box" @click="addShoot()">
+							<view class="">
+								<image class="add-img" src="../../static/img/tiktok/add.png" mode=""></image>
+							</view>
+						</view>
+						<navigator open-type="switchTab" url="/pages/news/news" class="tab-box">
+							<text class="text">消息</text>
+						</navigator>
+						<view class="tab-box" @click="toWhere('mine')">
+							<text class="text">我</text>
+						</view>
+
+					</view>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	/*
+		0. 加个提示，建议上传一分钟视频；
+		1. 在首页还要判断字数过长要多行展示？走马灯展示；
+		2. 新增一个音符动画；
+		3. 后退缓存清除，点击加号直接关注用户；
+		3a. 播放开始的位置；
+	*/
+	import utils from '@/common/utils.js'
+	import chunleiVideo from '@/components/chunlei-video/chunlei-video';
+	import scrollMixins from './scrollMixins';
+	const BindingX = uni.requireNativePlugin('bindingx');
+	const animation = weex.requireModule('animation');
+	const modal = weex.requireModule('modal');
+	import {
+		getVideos,
+		addOrDeleteLikeVideo, // 淮矿抖音添加移除收藏接口
+		hadSeen, // 淮矿抖音用户记录已刷视频接口
+	} from '@/common/api.js'; //引入需要的api 
+	export default {
+		mixins: [scrollMixins],
+		components: {
+			chunleiVideo
+		},
+		data() {
+			return {
+				isShowVideos: false, // 控制展示首页内容
+				tempVideoList: [],
+				danmuList: [
+					// 	{
+					// 	text: '发条弹幕0',
+					// 	color: '#fff',
+					// 	time: 2,
+					// 	avatar: '../../static/avatar.png'
+					// },
+				],
+				videoList: [
+					// 	{
+					// 	src: 'http://baobab.kaiyanapp.com/api/v1/playUrl?vid=129764&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss',
+					// 	content: '广告有反转：危机感十足！一辆车都比你靠谱',
+					// 	flag: false,
+					// 	check: true,
+					// 	like: '7w',
+					// 	comment: '1045',
+					// 	avatar: 'http://img.kaiyanapp.com/e44ed5fcfa424ba35761ce5f1339bc16.jpeg?imageMogr2/quality/60/format/jpg',
+					// 	initialTime: 0,
+					// 	at: '欧美广告精选',
+					// 	duration: 149
+					// }, {
+					// 	src: 'http://baobab.kaiyanapp.com/api/v1/playUrl?vid=164015&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss',
+					// 	content: '为什么要选择uni-app？',
+					// 	flag: true,
+					// 	check: true,
+					// 	like: '10w',
+					// 	comment: '1045',
+					// 	avatar: '../../static/logo.png',
+					// 	initialTime: 20,
+					// 	at: 'Dcloud',
+					// 	duration: 841,
+					// 	objectFit: 'fill'
+					// },
+				],
+				oldIndex: null,
+			}
+		},
+		// 先摸清楚播放逻辑，然后引入接口
+		created() {
+			this.init()
+			//隐藏subnvue
+			uni.getSubNVueById('comment').hide()
+			uni.getSubNVueById('input-box').hide()
+		},
+
+		async mounted() {
+			uni.showLoading({});
+			console.log('触发一次');
+			//this.videoPlay(this.index)
+			await this.pushVideoList(1).then(res => {
+				setTimeout(() => {
+					this.isShowVideos = true;
+					uni.hideLoading();
+				}, 1000);
+			})
+			this.$nextTick(() => {
+				this.videoPlay(this.index)
+			})
+		},
+		onShow() {
+			this.videoPlay(this.index)
+			// uni.getSubNVueById('tabSubNvue').show('none', 0, () => {});
+		},
+		onHide() {
+			for (let item of this.videoList) {
+				item.flag = false
+			}
+		},
+		methods: {
+			// 组件emit触发父组件事件
+			playEvent() {
+				// return;
+				// 用户快速滑动视频时，可能视频未播放时就滑过去了，导致没有触发已查看接口；
+				if (this.oldIndex !== this.index) {
+					this.oldIndex = this.index;
+					hadSeen({
+						zj: this.videoList[this.index].zj
+					}).then(res => {
+						if (res.flag === 1) {
+							console.log('当前已阅读视频zj:' + this.videoList[this.index].zj);
+						}
+					}).catch(err => {
+						uni.showToast({
+							title: `异常，请稍后重试`,
+							icon: 'none'
+						});
+					})
+				}
+			},
+			clickbt() {
+				console.log(11)
+			},
+			//设置参数
+			init() {
+				this.typeX = false //开启左右滑动
+				this.playCount = 2 //剩余多少视频加载视频列表
+				this.startDistance = 5 //判断左右上下拖动的启动距离 px
+				this.minTime = 300 //判断快速滑动的时间,该时间内无视回弹距离判断
+				this.backDistance = 200 //判断tempVideoList[0].src;上下滑动的回弹距离 px
+			},
+
+			// 将视频的尺寸获取并传递；?
+			pushVideoList(num) {
+				let promise = new Promise((resolve, reject) => {
+					getVideos({
+						cs: num
+					}).then(res => {
+						let tempVideoList = [];
+						console.log(JSON.stringify(res.datas));
+						for (let item of res.datas) {
+							let temp = {};
+							temp.zj = item.zj;
+							temp.userId = item.yhgh;
+							temp.src = utils.dealInternetUrl(item.SPDZ, '', this.$store.state.userInfo
+								.userId);
+							// `http://www.hbcoal.cn:8999/document/check?fileId=${item.SPDZ}&userId=${this.$store.state.userInfo.userId}&attname=`;
+							temp.content = item.spjj;
+							temp.tag = item.spbq;
+							temp.like = item.spdzs;
+							temp.attention = item.SFGZYH === 0 ? false : true;
+							temp.at = item.yhxm;
+							temp.check = item.SFSCSP === 0 ? false : true;
+							temp.flag = false;
+							temp.comment = '0';
+							temp.avatar = utils.dealInternetUrl(item.TXDZ, '', this.$store.state.userInfo
+								.userId);
+							temp.initialTime = 20;
+							temp.duration = 60;
+							temp.objectFit = 'fill';
+							// 采用utils的方法，拼接头像地址和视频地址
+							// 然后再打个包
+							tempVideoList.push(temp);
+							// 这里是判断src为空 则赋值，然后再增加一个空值
+							this.videoList.push({
+								src: '预置空值',
+								zj: '',
+								userId: '',
+								content: '',
+								tag: '',
+								flag: false,
+								check: false,
+								like: '',
+								attention: '',
+								comment: '',
+								avatar: '',
+								initialTime: 0,
+								at: '',
+								duration: 60
+							});
+						}
+						// 先push相对应的数目的对象，然后延迟执行1s  原因：直接this.videoList.push(temp)会导致视频播放异常
+						setTimeout(() => {
+							this.isShow = true;
+							for (let s of this.videoList) {
+								if (s.src === '预置空值') {
+									if (tempVideoList[0]) {
+										// 赋值第一个，然后删除第一个 然后循环赋值下一个第一个
+										s.src = tempVideoList[0].src;
+										s.zj = tempVideoList[0].zj;
+										s.userId = tempVideoList[0].userId;
+										s.content = tempVideoList[0].content;
+										s.tag = tempVideoList[0].tag.split(',');
+										s.like = tempVideoList[0].like;
+										s.attention = tempVideoList[0].attention;
+										s.check = tempVideoList[0].check;
+										s.at = tempVideoList[0].at;
+										s.avatar = tempVideoList[0].avatar;
+										tempVideoList.shift();
+									}
+								}
+							}
+							console.log(JSON.stringify(this.videoList));
+						}, 888);
+						resolve()
+					});
+				})
+				return promise
+			},
+			tapLove(e) {
+				e.stopPropagation();
+				if (this.distanceX != 0) return
+				this.videoList[this.index].check = !this.videoList[this.index].check
+				this.videoList = [...this.videoList]
+				uni.vibrateShort({
+					success: function() {
+						console.log('success');
+					}
+				});
+				console.log(JSON.stringify(this.videoList[this.index]));
+				let tempType = '';
+				if (!this.videoList[this.index].check) {
+					tempType = 'delete';
+					this.videoList[this.index].like--;
+				} else {
+					this.videoList[this.index].like++;
+				}
+				addOrDeleteLikeVideo({
+					zj: this.videoList[this.index].zj,
+					type: tempType
+				}).then(res => {
+					console.log(JSON.stringify(res));
+				}).catch(err => {
+					uni.showToast({
+						title: `异常，请稍后重试`,
+						icon: 'none'
+					});
+				})
+			},
+			tapAvatar(e) {
+				console.log(JSON.stringify(this.videoList[this.index]));
+				e.stopPropagation();
+				if (this.distanceX != 0) return
+				uni.navigateTo({
+					url: `/pages/tiktok/others?attention=${this.videoList[this.index].attention}&userId=${this.videoList[this.index].userId}&avatar=${encodeURIComponent(JSON.stringify(this.videoList[this.index].avatar))}`
+				});
+			},
+			tapMsg(e) {
+				// e.stopPropagation();
+				// if (this.distanceX != 0) return
+				// uni.getSubNVueById('comment').show('none', 0, () => {
+				// 	uni.$emit('showComment', this.videoList[this.index].content)
+				// });
+			},
+			tapShare(e) {
+				// 获取index，如何触发已经刷了的事件；
+				// 每次都会触发暂停事件，在这该时机去利用当前index 然后取视频简介，打印看一下是不是当前视频，然后再打印主键，然后调用接口
+				// 如何阻止多次调用，当index变化之后 再允许继续调用
+				e.stopPropagation();
+				if (this.distanceX != 0) return
+				uni.showToast({
+					icon: 'none',
+					title: `分享索引为${this.index}的视频`
+				})
+			},
+			toWhere(where) {
+				uni.navigateTo({
+					url: `/pages/tiktok/${where}`
+				});
+			},
+			toSearch() {
+				uni.navigateTo({
+					url: `/pages/tiktok/search`
+				});
+			},
+			// 添加随拍
+			addShoot() {
+				uni.navigateTo({
+					url: `/pages/tiktok/addShoot?sourceType=camera`
+				})
+				// var self = this;
+				// uni.chooseVideo({
+				// 	count: 1,
+				// 	sourceType: ['camera'],
+				// 	// sourceType: ['camera', 'album'],
+				// 	compressed: true,
+				// 	success: function(res) {
+				// 		// self.src = res.tempFilePath;
+				// 		console.log(res.tempFilePath);
+				// 		uni.navigateTo({
+				// 			url: `/pages/tiktok/addShoot?tempFilePath=${res.tempFilePath}`
+				// 		})
+				// 	},
+				// 	fail: function(res) {
+				// 		console.log('error选择视频=========' + JSON.stringify(res));
+				// 	}
+				// });
+
+			},
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.page {
+		flex: 1;
+		overflow: hidden;
+		position: relative;
+		background-color: #000;
+	}
+
+	.swiper {
+		position: relative;
+		background-color: #000;
+	}
+
+	.left-div {
+		position: absolute;
+		top: 0;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.right-div {
+		position: absolute;
+		top: 0;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.title-text {
+		font-size: 16px;
+		color: #333333;
+	}
+
+	.video-box {
+		position: relative;
+		background-color: #000;
+	}
+
+	.cover-view-center {
+
+		position: fixed;
+		justify-content: center;
+		align-items: center;
+
+		z-index: 999;
+	}
+
+	.cover-view-bottom {
+		position: fixed;
+		// width: 750rpx;
+		// height: 1000px;
+		// background-color: gray;
+		overflow: hidden;
+		z-index: 999;
+	}
+
+	.tab-box {
+		// background-color: red;
+	}
+
+	.tab {
+		height: 50px;
+		width: 750rpx;
+		background-color: rgba(0, 0, 0, 0.6);
+		align-items: center;
+		justify-content: center;
+		flex-direction: row;
+	}
+
+	.text {
+		color: #ffffff;
+	}
+
+	.tab-box {
+		align-items: center;
+		justify-content: center;
+		width: 150rpx;
+		color: #ffffff;
+		text-align: center;
+		height: 50px;
+		line-height: 50px;
+		font-size: 20px
+	}
+
+	.add-img {
+		width: 50rpx;
+		height: 50rpx;
+	}
+
+	.cover-view-left {
+		position: absolute;
+		margin-left: 10upx;
+		width: 500upx;
+		bottom: 200upx;
+		z-index: 9999;
+		font-size: 16px;
+		color: #FFFFFF;
+	}
+
+	.left-text {
+		font-size: 16px;
+		color: #FFFFFF;
+		margin-bottom: 20upx;
+	}
+
+	.tag-box {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+	}
+
+	.tag {
+		font-size: 12px;
+		color: #EFEFEF;
+		background-color: rgba(255, 255, 255, 0.2);
+		margin-right: 8px;
+		padding: 2px 8px;
+	}
+
+	.avatar {
+		border-radius: 50upx;
+		border-color: #fff;
+		border-style: solid;
+		border-width: 2px;
+	}
+
+	.cover-view-right {
+		position: absolute;
+		top: 400upx;
+		right: 20upx;
+		z-index: 9999;
+	}
+
+	.right-text-avatar {
+		position: absolute;
+		font-size: 14px;
+		top: 80upx;
+		left: 30upx;
+		height: 40upx;
+		width: 40upx;
+		background-color: #DD524D;
+		color: #FFFFFF;
+		border-radius: 50%;
+		text-align: center;
+		line-height: 40upx;
+		z-index: 999;
+	}
+
+	.avatar-icon {
+		height: 40upx;
+		width: 40upx;
+
+		color: #fff;
+		background-color: #DD524D;
+		border-radius: 50%;
+		position: absolute;
+		left: 30upx;
+		top: -20upx;
+	}
+
+	.right-text {
+		text-align: center;
+		font-size: 14px;
+		color: #FFFFFF;
+		margin-bottom: 50upx;
+		height: 20px;
+	}
+
+	.img {
+		height: 100upx;
+		width: 100upx;
+		opacity: 0.9;
+	}
+
+	.cover-view-top {
+		width: 750rpx;
+		height: 80px;
+		position: fixed;
+		z-index: 999;
+	}
+
+	.search-box {
+		display: flex;
+		justify-content: center;
+		align-items: flex-end;
+		width: 750rpx;
+		height: 100%;
+	}
+
+	.search-img {
+		width: 28px;
+		height: 28px;
+		margin-right: 40rpx;
+	}
+</style>

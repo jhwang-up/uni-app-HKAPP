@@ -1,0 +1,485 @@
+{
+	"pages": [{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "登陆",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/main/main",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/cards/cards",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/mine",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom",
+				"navigationBarTextStyle": "white" //状态栏字体颜色
+			}
+		},
+		{
+			"path": "pages/produce/produce",
+			"style": {
+				"navigationBarTitleText": "生产系统",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black" ,//状态栏字体颜色
+				"app-plus":{
+					"titleNView":{
+						"splitLine": { //原生导航栏加下边框
+							"color": "#F5F5F5",
+							"height": "1px"
+						}
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/todoWO/todoWO",
+			"style": {
+				"navigationBarTitleText": "待办工单",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/table",
+			"style": {
+				// "navigationBarTitleText": "动态设置",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/list/breakdownList",
+			"style": {
+				"navigationBarTitleText": "故障列表",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/produceEdit",
+			"style": {
+				"navigationBarTitleText": "生产系统",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/breakdownCreate",
+			"style": {
+				"navigationBarTitleText": "故障表单填写",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/breakdownEdit",
+			"style": {
+				"navigationBarTitleText": "故障系统",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/breakdownMaintain",
+			"style": {
+				"navigationBarTitleText": "故障表单维修",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/electromechanicalEdit",
+			"style": {
+				"navigationBarTitleText": "机电隐患",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/basicLevelEdit",
+			"style": {
+				"navigationBarTitleText": "基层隐患",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/lineEdit",
+			"style": {
+				"navigationBarTitleText": "通讯线路",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/edit/equipmentEdit",
+			"style": {
+				"navigationBarTitleText": "设备巡检",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/produceDetail",
+			"style": {
+				"navigationBarTitleText": "生产系统工单详情",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/breakdownDetail",
+			"style": {
+				"navigationBarTitleText": "故障系统工单详情",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/electromechanicalDetail",
+			"style": {
+				"navigationBarTitleText": "机电隐患工单详情",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/basicLevelDetail",
+			"style": {
+				"navigationBarTitleText": "机电基层隐患工单详情",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/lineDetail",
+			"style": {
+				"navigationBarTitleText": "通讯线路工单详情",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/todoWO/detail/equipmentDetail",
+			"style": {
+				"navigationBarTitleText": "设备巡检详情",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/auditWO",
+			"style": {
+				"navigationBarTitleText": "工单审核",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/table",
+			"style": {
+				// "navigationBarTitleText": "动态设置",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/detail/produceDetail",
+			"style": {
+				"navigationBarTitleText": "生产系统工单详情",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/audit/produceAudit",
+			"style": {
+				"navigationBarTitleText": "生产系统工单审核",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/audit/breakdownAudit",
+			"style": {
+				"navigationBarTitleText": "故障表单审核",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/detail/breakdownDetail",
+			"style": {
+				"navigationBarTitleText": "故障表单查看",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/audit/lineAudit",
+			"style": {
+				"navigationBarTitleText": "通讯线路审核",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/detail/lineDetail",
+			"style": {
+				"navigationBarTitleText": "通讯线路查看",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/audit/equipmentAudit",
+			"style": {
+				"navigationBarTitleText": "设备巡检审核",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/auditWO/detail/equipmentDetail",
+			"style": {
+				"navigationBarTitleText": "设备巡检查看",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/wait/wait",
+			"style": {
+				"navigationBarTitleText": "待开发",
+				// "navigationStyle": "custom",
+				"navigationBarTextStyle": "black" //状态栏字体颜色
+			}
+		},
+		{
+			"path": "pages/setting/setting",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		// "app-plus": {
+		//         "animationType": "zoom-out",
+		//         "animationDuration": 300
+		//     }
+		// "navigationStyle": "custom"
+		{
+			"path": "pages/newsDetail/newsDetail",
+			"style": {
+				"navigationBarTitleText": "通知公告",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/nfc/nfc",
+			"style": {
+				"navigationBarTitleText": "nfc",
+				"navigationBarTextStyle": "white",
+				"navigationBarBackgroundColor": "#252429"
+			}
+		},
+		{
+			"path": "pages/deviceList/deviceList",
+			"style": {
+				"navigationBarTitleText": "设备列表",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/deviceInfo/deviceInfo",
+			"style": {
+				"navigationBarTitleText": "设备详情",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/location/location",
+			"style": {
+				"navigationBarTitleText": "定位"
+			}
+		},
+		{
+			"path": "pages/job/list",
+			"style": {
+				"navigationBarTitleText": "我的岗位",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/job/step",
+			"style": {
+				"navigationBarTitleText": "标准化作业流程",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/job/job",
+			"style": {
+				"navigationBarTitleText": "岗位'3+1'",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/video/video",
+			"style": {
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tiktok/mine",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tiktok/others",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tiktok/videoDetail",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/tiktok/editUserInfo",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationBarTitleText": "编辑资料",
+				"navigationBarBackgroundColor": "#171724"
+			}
+		},
+		{
+			"path": "pages/tiktok/fansAndAttention",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationBarTitleText": "",
+				"navigationBarBackgroundColor": "#000000"
+			}
+		},
+		{
+			"path": "pages/tiktok/tiktok",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": false,
+				"app-plus": {
+					"background": "#000000", // 避免切换时，闪现白色屏幕
+					"subNVues": [
+						// 	{
+						// 	"id": "tabSubNvue", // 唯一标识  
+						// 	"path": "pages/tiktok/subNvue/tab", // 页面路径  
+						// 	/*"type": "popup",  这里不需要*/
+						// 	"style": {
+						// 		"position": "absolute",
+						// 		"bottom":"0",
+						// 		"dock":"bottom",
+						// 		"width": "750upx",
+						// 		"height": "50px",
+						// 		"background": "transparent"
+						// 	}
+						// },
+						// {
+						// 	"id": "comment",
+						// 	"path": "pages/tiktok/subnvue/comment",
+						// 	"style": {
+						// 		"height": "100%",
+						// 		"position": "absolute",
+						// 		"bottom": "0",
+						// 		"background": "transparent",
+						// 		"zindex": 1
+						// 	}
+						// }, 
+						// {
+						// 	"id": "input-box",
+						// 	"path": "pages/tiktok/subnvue/input-box",
+						// 	"style": {
+						// 		"height": "100%",
+						// 		"position": "absolute",
+						// 		"bottom": "0",
+						// 		"background": "transparent",
+						// 		"zindex": 2
+						// 	}
+						// }
+					]
+				}
+			}
+		}, {
+			"path": "pages/tiktok/search",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "pages/tiktok/addVideo",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationBarTitleText": "上传发布",
+				"navigationBarBackgroundColor": "#171724"
+				// "navigationStyle": "custom"
+			}
+		}, {
+			"path": "pages/tiktok/addShoot",
+			"style": {
+				"navigationBarTextStyle": "white",
+				"navigationBarTitleText": "随拍发布",
+				"navigationBarBackgroundColor": "#171724"
+				// "navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "uni_modules/uni-table/components/uni-td/uni-td",
+			"style": {}
+		},
+		{
+			"path": "uni_modules/uni-upgrade-center-app/pages/upgrade-popup",
+			"style": {
+				"disableScroll": true,
+				"app-plus": {
+					"backgroundColorTop": "transparent",
+					"background": "transparent",
+					"titleNView": false,
+					"scrollIndicator": false,
+					"popGesture": "none",
+					"animationType": "fade-in",
+					"animationDuration": 200
+				}
+			}
+		},
+		{
+			"path": "components/my-components/my-file-table",
+			"style": {}
+		}
+	],
+	// "background": "fff"
+	"globalStyle": {
+		// "navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8",
+		"app-plus": {
+			"background": "#efeff4"
+		}
+	},
+	"condition": {
+		//模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式(list 的索引项)
+		"list": [{
+			"name": "", //模式名称
+			"path": "pages/index/index", //启动页面，必选
+			"query": {
+				"gdzj": "8a818a5179e459f5017a11e729b012db",
+				"bzbh": "CS23530001-ZQXGZ3",
+				"xtbm": "CS23530001"
+			} //启动参数，在页面的onLoad函数里面得到
+		}]
+	}
+}
